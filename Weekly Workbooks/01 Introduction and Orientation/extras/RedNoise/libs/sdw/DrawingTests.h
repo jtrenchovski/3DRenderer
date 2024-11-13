@@ -13,3 +13,4 @@
 
 void drawGreyScaleGradient(DrawingWindow &window);
 void draw2DCoulourInterpolation(DrawingWindow &window);
+void drawLineTest(DrawingWindow &window);

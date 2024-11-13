@@ -10,6 +10,27 @@
 #include "iostream"
 #include "unordered_map"
 
+// This should be tested 
+
+	// std::vector<float> result;
+	// result = interpolateSingleFloats(2.2, 8.5, 7);
+	// for(size_t i=0; i<result.size(); i++) std::cout << result[i] << " ";
+	// std::cout << std::endl;
+
+	// glm::vec3 from(1.0, 4.0, 9.2);
+	// glm::vec3 to(4.0, 1.0, 9.8);
+
+	// std::vector<glm::vec3> result3D;
+	// result3D = interpolateThreeElementVectors(from, to, 4);
+	// for(size_t i=0; i<result3D.size(); i++){
+	// 	std::cout << "(";
+	// 	for(size_t j=0; j<3; j++){
+	// 		std::cout << result3D[i][j] << " ";
+	// 	}
+	// 	std::cout << ")";
+	// 	std::cout << std::endl;
+	// }
+
 int main() {
     // Test for interpolateSingleFloats
     std::vector<float> expectedSingleFloatResults = {2.2, 3.25, 4.3, 5.35, 6.4, 7.45, 8.5};
