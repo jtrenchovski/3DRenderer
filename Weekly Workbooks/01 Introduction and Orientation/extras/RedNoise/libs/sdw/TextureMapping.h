@@ -15,7 +15,5 @@
 void textureMapUpperTriangle(DrawingWindow &window, CanvasTriangle &triangle, CanvasTriangle sourceTriangle, TextureMap textureMap);
 void textureMapBottomTriangle(DrawingWindow &window, CanvasTriangle triangle, CanvasTriangle sourceTriangle, TextureMap textureMap);
 void textureMapping(DrawingWindow &window);
-std::vector<CanvasPoint> interpolateTwoCanvasPoints(CanvasPoint from, CanvasPoint to, float numberOfValues);
 std::vector<CanvasPoint> getSourceLine(CanvasTriangle triangle, float proportion, int numberOfPoints);
-std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to);
 uint32_t getIndex(size_t width, int x, int y);

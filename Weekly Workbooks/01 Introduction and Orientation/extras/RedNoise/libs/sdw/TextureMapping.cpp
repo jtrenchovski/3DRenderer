@@ -19,43 +19,6 @@ uint32_t getIndex(size_t width, int x, int y){
 	return width*y + x;
 }
 
-// Correct 100%
-std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to){
-	// This is actually the numberOfValues-1 
-	float diffX = to.x - from.x;
-	float diffY = to.y - from.y;
-
-	// We taking the bigger one of the 2 differences so there are no brakes in our line
-	// Number of steps is how much times do we need to add the stepSize to reach to.x
-	float numberOfSteps = std::max(abs(diffX), abs(diffY));
-	float stepSizeX = diffX/numberOfSteps;
-	float stepSizeY = diffY/numberOfSteps;
-
-	std::vector<CanvasPoint> line;
-
-	// We need to add stepSize numberOfSteps times to get to to.x
-	for(int i=0; i <= numberOfSteps; i++){
-		float x = from.x + (stepSizeX*i);
-		float y = from.y + (stepSizeY*i);
-		line.push_back(CanvasPoint(round(x), round(y)));
-	}
-
-	return line;
-}
-
-std::vector<CanvasPoint> interpolateTwoCanvasPoints(CanvasPoint from, CanvasPoint to, float numberOfValues){
-	std::vector<CanvasPoint> points(numberOfValues);
-	// Calculating the adding value for every dimension
-	float addValue1 = (to.x - from.x)/(numberOfValues-1);
-	float addValue2 = (to.y - from.y)/(numberOfValues-1);
-
-	for(int i = 0; i < numberOfValues; i++){
-		CanvasPoint p = CanvasPoint(from.x + addValue1*i, from.y + addValue2*i);
-		points[i] = p;
-	}
-	return points;
-}
-
 // Given the proportion of where the point is on the line in the target triangle, get the same point with the same
 // proportion but in the source triangle(the triangle with texture)
 std::vector<CanvasPoint> getSourceLine(CanvasTriangle triangle, float proportion, int numberOfPoints){

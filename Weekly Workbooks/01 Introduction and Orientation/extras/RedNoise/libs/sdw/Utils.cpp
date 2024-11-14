@@ -17,7 +17,7 @@ using namespace std;
 #define HEIGHT 240
 
 CanvasTriangle getRandomTriangle(){
-	CanvasPoint v0 = CanvasPoint(rand() % 319, rand() % 239);
+	CanvasPoint v0 = CanvasPoint((rand() + 50) % 319, rand() % 239);
 	CanvasPoint v1 = CanvasPoint(rand() % 319, rand() % 239);
 	CanvasPoint v2 = CanvasPoint(rand() % 319, rand() % 239);
 	CanvasTriangle triangle = CanvasTriangle(v0, v1, v2);
@@ -62,6 +62,75 @@ std::vector<glm::vec3> interpolateThreeElementVectors(glm::vec3 from, glm::vec3 
 		vs[i] = v;
 	}
 	return vs;
+}
+
+std::vector<CanvasPoint> interpolateTwoCanvasPoints(CanvasPoint from, CanvasPoint to, float numberOfValues){
+	std::vector<CanvasPoint> points(numberOfValues);
+	// Calculating the adding value for every dimension
+	float addValue1 = (to.x - from.x)/(numberOfValues-1);
+	float addValue2 = (to.y - from.y)/(numberOfValues-1);
+
+	for(int i = 0; i < numberOfValues; i++){
+		CanvasPoint p = CanvasPoint(from.x + addValue1*i, from.y + addValue2*i);
+		points[i] = p;
+	}
+	return points;
+}
+
+// Correct 100%
+std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to){
+	// This is actually the numberOfValues-1 
+	float diffX = to.x - from.x;
+	float diffY = to.y - from.y;
+
+	// We taking the bigger one of the 2 differences so there are no brakes in our line
+	// Number of steps is how much times do we need to add the stepSize to reach to.x
+	float numberOfSteps = std::max(abs(diffX), abs(diffY));
+	float stepSizeX = diffX/numberOfSteps;
+	float stepSizeY = diffY/numberOfSteps;
+
+	std::vector<CanvasPoint> line;
+
+	// We need to add stepSize numberOfSteps times to get to to.x
+	for(int i=0; i <= numberOfSteps; i++){
+		float x = from.x + (stepSizeX*i);
+		float y = from.y + (stepSizeY*i);
+		line.push_back(CanvasPoint(round(x), round(y)));
+	}
+
+	return line;
+}
+
+std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to, bool is3D){
+	// This is actually the numberOfValues-1 
+	float diffX = to.x - from.x;
+	float diffY = to.y - from.y;
+	float diffDepth = to.depth - from.depth;
+
+	// We taking the bigger one of the 2 differences so there are no brakes in our line
+	// Number of steps is how much times do we need to add the stepSize to reach to.x
+	float numberOfSteps = std::max(abs(diffX), abs(diffY));
+	float stepSizeX = diffX/numberOfSteps;
+	float stepSizeY = diffY/numberOfSteps;
+	float stepSizeDepth = diffDepth/numberOfSteps;
+
+	std::vector<CanvasPoint> line;
+	if(numberOfSteps == 0){
+		line.push_back(from);
+		return line;
+	}
+
+	line.push_back(from);
+	// We need to add stepSize numberOfSteps times to get to to.x
+	for(int i=1; i < numberOfSteps; i++){
+		float x = from.x + (stepSizeX*i);
+		float y = from.y + (stepSizeY*i);
+		float depth = from.depth + (stepSizeDepth*i);
+		line.push_back(CanvasPoint(round(x), round(y), round(depth)));
+	}
+	line.push_back(to);
+
+	return line;
 }
 
 // Correct 100%
@@ -111,10 +180,12 @@ void drawLine1(DrawingWindow &window, CanvasPoint from, CanvasPoint to, Colour c
 		float x = round(from.x + (stepSizeX*i));
 		float y = round(from.y + (stepSizeY*i));
 		float depth = from.depth + (stepSizeDepth*i);
-		if(1/depth > depthMatrix[y][x]){
-			window.setPixelColour(x, y, colourInt);
-			depthMatrix[y][x] = 1/depth;
-		} 
+		if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
+			if(1/depth > depthMatrix[y][x]){
+				window.setPixelColour(x, y, colourInt);
+				depthMatrix[y][x] = 1/depth;
+			} 
+		}
 	}
 }
 
@@ -153,6 +224,30 @@ CanvasPoint findLeftPoint(CanvasTriangle &triangle){
 	if(bottom.depth < top.depth) leftPointDepth = top.depth - depth;
 	else leftPointDepth = bottom.depth + depth;
 	return CanvasPoint(leftPointX, leftPointY, leftPointDepth);
+
+	// CanvasPoint right;
+	// float xDiff = bottom.x - top.x;
+	// float yDiff = bottom.y - top.y;
+	// float gradient = yDiff/xDiff;
+	// float zDiff = bottom.depth - top.depth;
+	
+
+	// float midDif_Y = top.y - left.y;
+	// float midDif_X = abs(midDif_Y / gradient);
+
+	// float depth = zDiff*(midDif_Y/yDiff);
+
+	// right.y = top.y - midDif_Y;
+	// if (bottom.x < top.x){
+	// 	right.x = top.x - midDif_X;
+	// 	if(bottom.depth < top.depth) right.depth = top.depth - depth ;
+	// 	else right.depth = top.depth + depth ;
+	// } else{
+	// 	right.x = top.x + midDif_X;
+	// 	if(bottom.depth < top.depth) right.depth = top.depth - depth ;
+	// 	else right.depth = top.depth + depth ;
+	// }
+	// return right;
 }
 
 std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unordered_map<std::string, Colour> &colourHashMap){

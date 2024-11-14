@@ -18,6 +18,9 @@ std::vector<std::string> split(const std::string &line, char delimiter);
 CanvasTriangle getRandomTriangle();
 std::vector<float> interpolateSingleFloats(float from, float to, float numberOfValues);
 std::vector<glm::vec3> interpolateThreeElementVectors(glm::vec3 from, glm::vec3 to, float numberOfValues);
+std::vector<CanvasPoint> interpolateTwoCanvasPoints(CanvasPoint from, CanvasPoint to, float numberOfValues);
+std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to);
+std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to, bool is3D);
 
 void drawLine1(DrawingWindow &window, CanvasPoint from, CanvasPoint to, Colour colour);
 void drawLine1(DrawingWindow &window, CanvasPoint from, CanvasPoint to, Colour colour, std::vector<std::vector<float>> &depthMatrix);
