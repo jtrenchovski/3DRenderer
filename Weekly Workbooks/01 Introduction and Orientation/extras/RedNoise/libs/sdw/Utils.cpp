@@ -110,6 +110,11 @@ std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to, bool is3D){
 	// We taking the bigger one of the 2 differences so there are no brakes in our line
 	// Number of steps is how much times do we need to add the stepSize to reach to.x
 	float numberOfSteps = std::max(abs(diffX), abs(diffY));
+	// For a more precise depth we get the difference in the z coordinate and 
+	// later we add the amount of steps we need. So for example if we have 20 coordinates
+	// but numberOfSteps is 3 we add 6 of the steps. If we devided it by 3 we would 
+	// have unaccurate
+	float numberOfStepsDepth = std::max(numberOfSteps, abs(diffDepth));
 	float stepSizeX = diffX/numberOfSteps;
 	float stepSizeY = diffY/numberOfSteps;
 	float stepSizeDepth = diffDepth/numberOfSteps;
@@ -126,7 +131,7 @@ std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to, bool is3D){
 		float x = from.x + (stepSizeX*i);
 		float y = from.y + (stepSizeY*i);
 		float depth = from.depth + (stepSizeDepth*i);
-		line.push_back(CanvasPoint(round(x), round(y), round(depth)));
+		line.push_back(CanvasPoint(round(x), round(y), depth));
 	}
 	line.push_back(to);
 
@@ -145,15 +150,10 @@ void drawLine1(DrawingWindow &window, CanvasPoint from, CanvasPoint to, Colour c
 	float stepSizeX = diffX/numberOfSteps;
 	float stepSizeY = diffY/numberOfSteps;
 
-	std::vector<float> xs = interpolateSingleFloats(from.x, to.x, numberOfSteps);
-	std::vector<float> ys = interpolateSingleFloats(from.y, to.y, numberOfSteps);
-
 	// We need to add stepSize numberOfSteps times to get to to.x
 	for(int i=0; i <= numberOfSteps; i++){
 		float x = from.x + (stepSizeX*i);
 		float y = from.y + (stepSizeY*i);
-		// float x = xs[i];
-		// float y = ys[i];
 		uint32_t colourInt = (255 << 24) + (int(colour.red) << 16) + (int(colour.green) << 8) + int(colour.blue);
 		window.setPixelColour(round(x), round(y), colourInt);
 	}

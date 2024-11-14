@@ -18,7 +18,7 @@ using namespace std;
 #define HEIGHT 240
 #define WHITE Colour(255, 255, 255)
 
-glm::vec3 cameraPosition = glm::vec3(0.0, -2.0, 4.0);
+glm::vec3 cameraPosition = glm::vec3(0.0, 0.0, 4.0);
 glm::mat3 cameraOrientation = glm::mat3(1.0);
 
 void DrawTriangle(DrawingWindow &window, CanvasTriangle triangle, Colour colour);
@@ -356,7 +356,6 @@ void FillBottomTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour 
 		// if(j+2 < rigthVertice.size()) while(rigthVertice[j+1].y == y) j++;
 		// while(leftVertice[i+1].y == y) if(i+1 < leftVertice.size()) i++; else break;
 		// while(rigthVertice[j+1].y == y) if(j+1 < rigthVertice.size()) j++; else break;
-		
 
 		// // This are the coordinates of the left and right point of the line that we need to draw
 		if(i < leftVertice.size() && (j < rigthVertice.size())){
@@ -370,7 +369,6 @@ void FillBottomTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour 
 				std::swap(startX, endX);
 				std::swap(depthFrom, depthTo);
 			}
-
 			// We taking the bigger one of the 2 differences so there are no brakes in our line
 			// Number of steps is how much times do we need to add the stepSize to reach to.x
 			// float numberOfSteps = std::max(abs(diffX), abs(diffY));
@@ -494,7 +492,7 @@ void FillUpperTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour c
 	// This says on which row we draw the line
 	int i = 0;
 	int j = 0;
-	for(int y = top.y; y < triangle.v1().y; y++){
+	for(int y = top.y; y <= triangle.v1().y; y++){
 		while(leftVertice[i+1].y == y) if(i+2 < leftVertice.size() && triangle.v1().x < top.x) i++; else break;
 		while(rigthVertice[j+1].y == y) if(j+2 < rigthVertice.size() && triangle.v2().x > top.x) j++; else break;
 		// This are the coordinates of the left and right point of the line that we need to draw
@@ -509,10 +507,23 @@ void FillUpperTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour c
 			std::swap(startX, endX);
 			std::swap(depthFrom, depthTo);
 		}
+			float temp = std::max(abs(leftVertice[i].x - rigthVertice[j].x), abs(leftVertice[i].y - rigthVertice[j].y));
+			float stepsDepth = std::max(abs(leftVertice[i].depth - rigthVertice[j].depth), temp);
+			// We taking the bigger one of the 2 differences so there are no brakes in our line
+			// Number of steps is how much times do we need to add the stepSize to reach to.x
+			// float numberOfSteps = std::max(abs(diffX), abs(diffY));
+			float stepSizeDepth = (depthTo - depthFrom)/(endX - startX);
+			
+	// 	float diffX = to.x - from.x;
+	// float diffY = to.y - from.y;
+	// float diffDepth = to.depth - from.depth;
+
+	// float numberOfSteps = std::max(abs(diffX), abs(diffY));
+	// float numberOfStepsDepth = std::max(numberOfSteps, abs(diffDepth));
 		
 		// We taking the bigger one of the 2 differences so there are no brakes in our line
 		// Number of steps is how much times do we need to add the stepSize to reach to.x
-		float stepSizeDepth = (depthTo - depthFrom)/(endX - startX);
+		// float stepSizeDepth = (depthTo - depthFrom)/(endX - startX + 1);
 
 		int t = 0;
 		for(int x = startX; x <= endX; x++){
@@ -570,10 +581,6 @@ CanvasPoint projectVertexOntoCanvasPoint(glm::vec3 cameraPosition, float focalLe
 	// -adjustedVector[2] is the z which is the depth(how close it is to the camera)
 	// we put - because z is already negative 
 	return CanvasPoint(u, v, -adjustedVector[2]);
-}
-
-glm::vec3 translateCameraPosition(glm::vec3 cameraPosition, glm::vec3 translationValue){
-	return cameraPosition + translationValue;
 }
 
 // Rotate around X - axis
@@ -644,7 +651,7 @@ int main(int argc, char *argv[]) {
 		// draw(window);
 		window.clearPixels();
 		// drawLineTest(window);
-		// orbit(cameraOrientation, cameraPosition, 0.005);
+		orbit(cameraOrientation, cameraPosition, 0.005);
 		render3DModel(window, modelTriangles, 2.0, cameraPosition, cameraOrientation);
 		// drawLineTest(window);
 		// textureMapping(window);
