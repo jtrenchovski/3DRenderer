@@ -6,7 +6,7 @@
 
 struct RayTriangleIntersection {
 	glm::vec3 intersectionPoint;
-	float distanceFromCamera;
+	float distanceFromCamera = std::numeric_limits<float>::max();
 	ModelTriangle intersectedTriangle;
 	size_t triangleIndex;
 
