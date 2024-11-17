@@ -20,15 +20,19 @@ using namespace std;
 #define HEIGHT 240
 #define WHITE Colour(255, 255, 255)
 
-glm::vec3 cameraPosition = glm::vec3(0.0, 0.0, 4.0);
+glm::vec3 cameraPosition = glm::vec3(0.0, 0.5, 3.0); // (0.0, 0.5, 3.0) for shading
 glm::mat3 cameraOrientation = glm::mat3(1.0);
 bool orbitBool = false;
-int mode = 2;
+int mode = 3;
+float focalLength = 2.0;
+float scale = 0.35; // 0.35
+glm::vec3 lightSource = glm::vec3(0, 1.4, 4.5) * scale; // put (0.0, 1.4, 5.0) for good phong.
+float sourceIntensity = 10000;
 
 void DrawTriangle(DrawingWindow &window, CanvasTriangle triangle, Colour colour);
 void DrawFullTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour colour);
 std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to);
-glm::vec3 changeCameraPosition(glm::vec3);
+void changeCameraPosition(glm::vec3 translationVector);
 glm::mat3 panCamera(glm::mat3 cameraOrientation, float angle);
 glm::mat3 tiltCamera(glm::mat3 cameraOrientation, float angle);
 void orbit(glm::mat3 &cameraOrientation, glm::vec3 &cameraPosition, float angle, bool orbitBool);
@@ -51,11 +55,19 @@ void drawRasterisedScene(DrawingWindow &window, std::vector<ModelTriangle> model
 
 void handleEvent(SDL_Event event, DrawingWindow &window) {
 	if (event.type == SDL_KEYDOWN) {
-		if (event.key.keysym.sym == SDLK_LEFT) std::cout << "LEFT" << std::endl;
-		else if (event.key.keysym.sym == SDLK_RIGHT) std::cout << "RIGHT" << std::endl;
-		else if (event.key.keysym.sym == SDLK_UP) std::cout << "UP" << std::endl;
-		else if (event.key.keysym.sym == SDLK_DOWN) std::cout << "DOWN" << std::endl;
-		else if (event.key.keysym.sym == SDLK_u){
+		if (event.key.keysym.sym == SDLK_LEFT){
+			changeCameraPosition(glm::vec3(-0.5, 0.0, 0.0));
+		} else if (event.key.keysym.sym == SDLK_RIGHT){
+			changeCameraPosition(glm::vec3(0.5, 0.0, 0.0));
+		} else if (event.key.keysym.sym == SDLK_UP){
+			changeCameraPosition(glm::vec3(0.0, 0.5, 0.0));
+		} else if (event.key.keysym.sym == SDLK_DOWN){
+			changeCameraPosition(glm::vec3(0.0, -0.5, 0.0));
+		} else if (event.key.keysym.sym == SDLK_m){
+			changeCameraPosition(glm::vec3(0.0, 0.0, 0.5));
+		} else if (event.key.keysym.sym == SDLK_n){
+			changeCameraPosition(glm::vec3(0.0, 0.0, -0.5));
+		} else if (event.key.keysym.sym == SDLK_u){
 			Colour colour = Colour(rand() % 256, rand() % 256, rand() % 256);
 			CanvasTriangle triangle = getRandomTriangle();
 			DrawTriangle(window, triangle, colour);
@@ -85,6 +97,10 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
 		window.savePPM("output.ppm");
 		window.saveBMP("output.bmp");
 	} 
+}
+
+void changeCameraPosition(glm::vec3 translationVector){
+	cameraPosition += translationVector;
 }
 
 // There is not points outside of the edges when 'f' is pressed. With and without the
@@ -219,8 +235,8 @@ bool getClosestIntersection(std::vector<ModelTriangle> modelTriangles, glm::vec3
 		if(possibleSolution[0] < closestIntersectionPoint.distanceFromCamera && 0 < possibleSolution[0] &&
 				(u >= 0.0 && u <= 1.0) && (v >= 0.0 && v <= 1.0) && ((u + v) <= 1.0)){
 			found = true;
-			glm::vec3 intersectionPoint = triangle.vertices[0] + possibleSolution[1]*e0 + possibleSolution[2]*e1;
-			closestIntersectionPoint = RayTriangleIntersection(intersectionPoint, possibleSolution[0], triangle, i);
+			glm::vec3 intersectionPoint = triangle.vertices[0] + u*e0 + v*e1;
+			closestIntersectionPoint = RayTriangleIntersection(intersectionPoint, possibleSolution[0], triangle, i, glm::vec3(1.0f-u-v, u, v));
 		}
 		i++;
 	}
@@ -248,6 +264,39 @@ bool isShadow(std::vector<ModelTriangle> modelTriangles, glm::vec3 lightSource, 
 	return false;
 }
 
+float calculateIntensityAngle(RayTriangleIntersection rayTriangleIntersection){
+	ModelTriangle modelTriangle = rayTriangleIntersection.intersectedTriangle;
+	glm::vec3 targetPoint = rayTriangleIntersection.intersectionPoint;
+	glm::vec3 directionToLight = glm::normalize(lightSource - targetPoint);
+	glm::vec3 barycentric = rayTriangleIntersection.barycentric;
+	std::array<glm::vec3, 3> vertexNormals = modelTriangle.vertexNormals;
+	glm::vec3 normal = vertexNormals[0]*barycentric[0] + vertexNormals[1]*barycentric[1] + vertexNormals[2]*barycentric[2];
+	// cout << directionToLight.x << directionToLight.y << directionToLight.z << endl;
+	float intensity = max(0.0f, glm::dot(directionToLight, normal));
+	cout << intensity << endl;
+	return intensity;
+	
+}
+
+float calculateIntensityDistance(glm::vec3 targetPoint){
+	float d = glm::length(targetPoint - lightSource);
+	float intensity = sourceIntensity/(4.0f*3.14f*std::pow(d, 2));
+	return intensity;
+}
+
+float specularLighting(RayTriangleIntersection rayTriangleIntersection){
+	ModelTriangle modelTriangle = rayTriangleIntersection.intersectedTriangle;
+	glm::vec3 targetPoint = rayTriangleIntersection.intersectionPoint;
+	glm::vec3 L = glm::normalize(targetPoint - lightSource);
+	glm::vec3 N = modelTriangle.normal;
+	glm::vec3 R = glm::normalize(L - 2.0f*N*(glm::dot(L, N)));
+	glm::vec3 vectorToCameraPosition = glm::normalize(cameraPosition - targetPoint);
+	float specular = std::pow(glm::dot(R, vectorToCameraPosition), 256);
+	float intensity = max(0.0f, specular);
+	cout << intensity << endl;
+	return intensity;
+}
+
 void drawRayTracing(DrawingWindow &window, std::vector<ModelTriangle> modelTriangles, glm::vec3 cameraPosition, float focalLength, glm::vec3 lightSource){
 	window.clearPixels();
 
@@ -262,7 +311,18 @@ void drawRayTracing(DrawingWindow &window, std::vector<ModelTriangle> modelTrian
 				// Is it a shadow
 				if(!isShadow(modelTriangles, lightSource, intersection.intersectionPoint)){
 					Colour colour = intersection.intersectedTriangle.colour;
-					uint32_t colourInt = (255 << 24) + (int(colour.red) << 16) + (int(colour.green) << 8) + int(colour.blue);
+					float intensityDistance =  glm::clamp(calculateIntensityDistance(intersection.intersectionPoint), 0.001f, 1.0f);
+					float intensityAngle = calculateIntensityAngle(intersection);
+					float intensitySpecular = specularLighting(intersection);
+					// cout << intensityAngle << endl;
+					float intensity = (intensityAngle*0.45f + intensityDistance*0.45f + intensitySpecular*0.1f);
+					// cout << intensity << endl;
+					uint32_t colourInt = (255 << 24) + (int(colour.red*intensity) << 16) + (int(colour.green*intensity) << 8) + int(colour.blue*intensity);
+					window.setPixelColour(i + WIDTH/2, -j + HEIGHT/2, colourInt);
+				} else{
+					Colour colour = intersection.intersectedTriangle.colour;
+					float threshold = 0.25f;
+					uint32_t colourInt = (255 << 24) + (int(colour.red*threshold) << 16) + (int(colour.green*threshold) << 8) + int(colour.blue*threshold);
 					window.setPixelColour(i + WIDTH/2, -j + HEIGHT/2, colourInt);
 				}
 			}
@@ -279,12 +339,11 @@ int main(int argc, char *argv[]) {
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
 
-	float focalLength = 2.0;
-	float scale = 0.35; // 0.35
+	
 	unordered_map<std::string, Colour> colourHashMap = readMTLfile("cornell-box.mtl");
-	glm::vec3 lightSource = glm::vec3(0, 2.4, 0) * scale; 
-	std::vector<ModelTriangle> modelTriangles = readOBJfile("cornell-box.obj", scale, colourHashMap); 
-
+	// std::vector<ModelTriangle> modelTriangles = readOBJfile("cornell-box.obj", scale, colourHashMap); 
+	std::vector<ModelTriangle> modelTriangles = readOBJfile("sphere.obj", scale, colourHashMap); 
+	cout << "done" << endl;
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !
 		if (window.pollForInputEvents(event)) handleEvent(event, window);

@@ -224,30 +224,6 @@ CanvasPoint findLeftPoint(CanvasTriangle &triangle){
 	if(bottom.depth < top.depth) leftPointDepth = top.depth - depth;
 	else leftPointDepth = bottom.depth + depth;
 	return CanvasPoint(leftPointX, leftPointY, leftPointDepth);
-
-	// CanvasPoint right;
-	// float xDiff = bottom.x - top.x;
-	// float yDiff = bottom.y - top.y;
-	// float gradient = yDiff/xDiff;
-	// float zDiff = bottom.depth - top.depth;
-	
-
-	// float midDif_Y = top.y - left.y;
-	// float midDif_X = abs(midDif_Y / gradient);
-
-	// float depth = zDiff*(midDif_Y/yDiff);
-
-	// right.y = top.y - midDif_Y;
-	// if (bottom.x < top.x){
-	// 	right.x = top.x - midDif_X;
-	// 	if(bottom.depth < top.depth) right.depth = top.depth - depth ;
-	// 	else right.depth = top.depth + depth ;
-	// } else{
-	// 	right.x = top.x + midDif_X;
-	// 	if(bottom.depth < top.depth) right.depth = top.depth - depth ;
-	// 	else right.depth = top.depth + depth ;
-	// }
-	// return right;
 }
 
 std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unordered_map<std::string, Colour> &colourHashMap){
@@ -257,6 +233,9 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 	std::vector<glm::vec3> vertices;
 	vertices.push_back(glm::vec3(0, 0, 0));
 	Colour colour;
+	std::vector<std::pair<glm::vec3, int>> sumOfNormals_nOfNormals;
+	sumOfNormals_nOfNormals.push_back({glm::vec3(0.0, 0.0, 0.0), 0});
+	float vI = 0.0f;
 	if(fileStream.is_open()){
 		while(getline(fileStream, line)){
 			std::vector<std::string> lineSplit = split(line, ' ');
@@ -264,8 +243,9 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 			if(lineSplit[0] == "usemtl"){
 				colour = colourHashMap[lineSplit[1]];
 			// v is vector
-			}else if(lineSplit[0] == "v"){
+			} else if(lineSplit[0] == "v"){
 				vertices.push_back(glm::vec3(scale*std::stof(lineSplit[1]), scale*std::stof(lineSplit[2]), scale*std::stof(lineSplit[3])));
+				sumOfNormals_nOfNormals.push_back({glm::vec3(0.0, 0.0, 0.0), 0});
 			// f is facet or triangle
 			} else if(lineSplit[0] == "f"){
 				std::vector<int> vIndex;
@@ -273,6 +253,15 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 					vIndex.push_back(std::stoi(split(lineSplit[i], '/').at(0)));
 				}
 				ModelTriangle temp = ModelTriangle(vertices[vIndex[0]], vertices[vIndex[1]], vertices[vIndex[2]], colour);
+				temp.vertexIndexes = {vIndex[0], vIndex[1], vIndex[2]};
+				glm::vec3 normal = glm::normalize(glm::cross(temp.vertices[2] - temp.vertices[0], temp.vertices[1] - temp.vertices[0]))*-1.0f;
+				temp.normal = normal;
+				sumOfNormals_nOfNormals[vIndex[0]].first += normal;
+				sumOfNormals_nOfNormals[vIndex[0]].second += 1;
+				sumOfNormals_nOfNormals[vIndex[1]].first += normal;
+				sumOfNormals_nOfNormals[vIndex[1]].second += 1;
+				sumOfNormals_nOfNormals[vIndex[2]].first += normal;
+				sumOfNormals_nOfNormals[vIndex[2]].second += 1;
 				modelTriangles.push_back(temp);
 			} else{
 				continue;
@@ -281,7 +270,15 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 	}else{
 		cout << "Failed to open file." << endl;
 	}
-
+	for(int i = 0; i < vertices.size(); i++){
+		vertices[i] = sumOfNormals_nOfNormals[i].first/float(sumOfNormals_nOfNormals[i].second);
+	}
+	for(ModelTriangle& triangle : modelTriangles){
+		for(int i = 0; i < 3; i++){
+			triangle.vertexNormals[i] = vertices[triangle.vertexIndexes[i]];
+			cout << triangle.vertexNormals[i].x << triangle.vertexNormals[i].y << triangle.vertexNormals[i].z << endl;
+		}
+	}
 	fileStream.close();
 	return modelTriangles;
 }
