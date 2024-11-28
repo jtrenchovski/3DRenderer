@@ -236,6 +236,7 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 	std::vector<std::pair<glm::vec3, int>> sumOfNormals_nOfNormals;
 	sumOfNormals_nOfNormals.push_back({glm::vec3(0.0, 0.0, 0.0), 0});
 	float vI = 0.0f;
+	bool sphere = false;
 	if(fileStream.is_open()){
 		while(getline(fileStream, line)){
 			std::vector<std::string> lineSplit = split(line, ' ');
@@ -243,8 +244,19 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 			if(lineSplit[0] == "usemtl"){
 				colour = colourHashMap[lineSplit[1]];
 			// v is vector
+			} else if(lineSplit[0] == "o"){
+				if(lineSplit[1] == "sphere"){
+					sphere = true;
+				}
 			} else if(lineSplit[0] == "v"){
-				vertices.push_back(glm::vec3(scale*std::stof(lineSplit[1]), scale*std::stof(lineSplit[2]), scale*std::stof(lineSplit[3])));
+				float x = std::stof(lineSplit[1]);
+				float y = std::stof(lineSplit[2]);
+				float z = std::stof(lineSplit[3]);
+				if(sphere){
+					x += 0.90;
+					y -= 1.60;
+				}
+				vertices.push_back(glm::vec3(scale*x, scale*y, scale*z));
 				sumOfNormals_nOfNormals.push_back({glm::vec3(0.0, 0.0, 0.0), 0});
 			// f is facet or triangle
 			} else if(lineSplit[0] == "f"){
@@ -264,6 +276,7 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 				sumOfNormals_nOfNormals[vIndex[2]].second += 1;
 				modelTriangles.push_back(temp);
 			} else{
+				sphere = false;
 				continue;
 			}
 		}

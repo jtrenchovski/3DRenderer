@@ -20,13 +20,13 @@ using namespace std;
 #define HEIGHT 240
 #define WHITE Colour(255, 255, 255)
 
-glm::vec3 cameraPosition = glm::vec3(0.0, 0.5, 3.0); // (0.0, 0.5, 3.0) for shading
+glm::vec3 cameraPosition = glm::vec3(0.0, 0.0, 4.5); // (0.0, 0.5, 3.0) for shading
 glm::mat3 cameraOrientation = glm::mat3(1.0);
 bool orbitBool = false;
-int mode = 3;
+int mode = 2;
 float focalLength = 2.0;
 float scale = 0.35; // 0.35
-glm::vec3 lightSource = glm::vec3(0, 1.4, 4.5) * scale; // put (0.0, 1.4, 5.0) for good phong.
+glm::vec3 lightSource = glm::vec3(0, 1.4, 2.5) * scale; // put (0.0, 1.4, 5.0) for good phong.
 float sourceIntensity = 10000;
 
 void DrawTriangle(DrawingWindow &window, CanvasTriangle triangle, Colour colour);
@@ -117,7 +117,7 @@ void FillBottomTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour 
 	// This says on which row we draw the line
 	int i = 0;
 	int j = 0;
-	for(int y = triangle.v0().y; y <= bottom.y; y++){
+	for(int y = triangle.v0().y; y < bottom.y; y++){
 		if(i+2 < leftVertice.size() && triangle.v1().x < bottom.x) while(leftVertice[i+1].y == y) i++;
 		if(j+2 < rigthVertice.size() && triangle.v0().x > bottom.x) while(rigthVertice[j+1].y == y) j++;
 		// This are the coordinates of the left and right point of the line that we need to draw
@@ -341,8 +341,8 @@ int main(int argc, char *argv[]) {
 
 	
 	unordered_map<std::string, Colour> colourHashMap = readMTLfile("cornell-box.mtl");
-	// std::vector<ModelTriangle> modelTriangles = readOBJfile("cornell-box.obj", scale, colourHashMap); 
-	std::vector<ModelTriangle> modelTriangles = readOBJfile("sphere.obj", scale, colourHashMap); 
+	std::vector<ModelTriangle> modelTriangles = readOBJfile("cornell-box.obj", scale, colourHashMap); 
+	// std::vector<ModelTriangle> modelTriangles = readOBJfile("sphere.obj", scale, colourHashMap); 
 	cout << "done" << endl;
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !

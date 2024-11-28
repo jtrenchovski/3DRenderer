@@ -71,6 +71,9 @@ void FillUpperTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour c
 	if(triangle.v1().x > triangle.v2().x) std::swap(triangle.v1(), triangle.v2());
 	std::vector<CanvasPoint> leftVertice = getLine(top, triangle.v1(), true);
 	std::vector<CanvasPoint> rigthVertice = getLine(top, triangle.v2(), true);
+
+	std::vector<float> leftVertice1 = interpolateSingleFloats(top.x, triangle.v1().x, triangle.v1().y - top.y + 1);
+	std::vector<float> rightVertice1 = interpolateSingleFloats(top.x, triangle.v2().x, triangle.v2().y - top.y + 1);
 	
 	// This says on which row we draw the line
 	int i = 0;
