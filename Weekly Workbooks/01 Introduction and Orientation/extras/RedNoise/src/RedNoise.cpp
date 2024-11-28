@@ -10,7 +10,6 @@
 #include <iostream>
 #include <ModelTriangle.h>
 #include <unordered_map>
-#include <TextureMapping.h>
 #include <Renderer.h>
 #include <RayTriangleIntersection.h>
 
@@ -273,7 +272,7 @@ float calculateIntensityAngle(RayTriangleIntersection rayTriangleIntersection){
 	glm::vec3 normal = vertexNormals[0]*barycentric[0] + vertexNormals[1]*barycentric[1] + vertexNormals[2]*barycentric[2];
 	// cout << directionToLight.x << directionToLight.y << directionToLight.z << endl;
 	float intensity = max(0.0f, glm::dot(directionToLight, normal));
-	cout << intensity << endl;
+	// cout << intensity << endl;
 	return intensity;
 	
 }
@@ -293,7 +292,7 @@ float specularLighting(RayTriangleIntersection rayTriangleIntersection){
 	glm::vec3 vectorToCameraPosition = glm::normalize(cameraPosition - targetPoint);
 	float specular = std::pow(glm::dot(R, vectorToCameraPosition), 256);
 	float intensity = max(0.0f, specular);
-	cout << intensity << endl;
+	// cout << intensity << endl;
 	return intensity;
 }
 
@@ -338,24 +337,22 @@ void drawWireFrame(DrawingWindow &window, std::vector<ModelTriangle> modelTriang
 int main(int argc, char *argv[]) {
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
-
 	
 	unordered_map<std::string, Colour> colourHashMap = readMTLfile("cornell-box.mtl");
 	std::vector<ModelTriangle> modelTriangles = readOBJfile("cornell-box.obj", scale, colourHashMap); 
-	// std::vector<ModelTriangle> modelTriangles = readOBJfile("sphere.obj", scale, colourHashMap); 
-	cout << "done" << endl;
+
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !
 		if (window.pollForInputEvents(event)) handleEvent(event, window);
 		
-		if(mode == 1){
-			drawWireFrame(window, modelTriangles, focalLength, cameraPosition, cameraOrientation);
-		} else if(mode == 2){
-			drawRasterisedScene(window, modelTriangles, focalLength, cameraPosition, cameraOrientation);
-		} else if(mode == 3){
-			drawRayTracing(window, modelTriangles, cameraPosition, WIDTH, lightSource);
-		}
-		orbit(cameraOrientation, cameraPosition, 0.005, orbitBool);
+			if(mode == 1){
+				drawWireFrame(window, modelTriangles, focalLength, cameraPosition, cameraOrientation);
+			} else if(mode == 2){
+				drawRasterisedScene(window, modelTriangles, focalLength, cameraPosition, cameraOrientation);
+			} else if(mode == 3){
+				drawRayTracing(window, modelTriangles, cameraPosition, WIDTH, lightSource);
+			}
+			orbit(cameraOrientation, cameraPosition, 0.005, orbitBool);
 		
 		// Need to render the frame at the end, or nothing actually gets shown on the screen !
 		window.renderFrame();
