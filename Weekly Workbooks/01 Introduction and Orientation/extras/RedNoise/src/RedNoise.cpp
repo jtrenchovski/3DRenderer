@@ -19,7 +19,7 @@ using namespace std;
 #define HEIGHT 240
 #define WHITE Colour(255, 255, 255)
 
-glm::vec3 cameraPosition = glm::vec3(0.0, 0.0, 4.5); // (0.0, 0.5, 3.0) for shading
+glm::vec3 cameraPosition = glm::vec3(0.0, 0.0, 4.0); // (0.0, 0.5, 3.0) for shading
 glm::mat3 cameraOrientation = glm::mat3(1.0);
 bool orbitBool = false;
 int mode = 2;
@@ -263,7 +263,7 @@ bool isShadow(std::vector<ModelTriangle> modelTriangles, glm::vec3 lightSource, 
 	return false;
 }
 
-float calculateIntensityAngle(RayTriangleIntersection rayTriangleIntersection){
+float calculateIntensityAngle_PhongShading(RayTriangleIntersection rayTriangleIntersection){
 	ModelTriangle modelTriangle = rayTriangleIntersection.intersectedTriangle;
 	glm::vec3 targetPoint = rayTriangleIntersection.intersectionPoint;
 	glm::vec3 directionToLight = glm::normalize(lightSource - targetPoint);
@@ -311,10 +311,10 @@ void drawRayTracing(DrawingWindow &window, std::vector<ModelTriangle> modelTrian
 				if(!isShadow(modelTriangles, lightSource, intersection.intersectionPoint)){
 					Colour colour = intersection.intersectedTriangle.colour;
 					float intensityDistance =  glm::clamp(calculateIntensityDistance(intersection.intersectionPoint), 0.001f, 1.0f);
-					float intensityAngle = calculateIntensityAngle(intersection);
+					float intensityAngle = calculateIntensityAngle_PhongShading(intersection);
 					float intensitySpecular = specularLighting(intersection);
 					// cout << intensityAngle << endl;
-					float intensity = (intensityAngle*0.45f + intensityDistance*0.45f + intensitySpecular*0.1f);
+					float intensity = (intensityAngle*0.5f + intensityDistance*0.3f + intensitySpecular*0.2f);
 					// cout << intensity << endl;
 					uint32_t colourInt = (255 << 24) + (int(colour.red*intensity) << 16) + (int(colour.green*intensity) << 8) + int(colour.blue*intensity);
 					window.setPixelColour(i + WIDTH/2, -j + HEIGHT/2, colourInt);
@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
 			} else if(mode == 3){
 				drawRayTracing(window, modelTriangles, cameraPosition, WIDTH, lightSource);
 			}
-			orbit(cameraOrientation, cameraPosition, 0.005, orbitBool);
+			orbit(cameraOrientation, cameraPosition, 0.01, orbitBool);
 		
 		// Need to render the frame at the end, or nothing actually gets shown on the screen !
 		window.renderFrame();

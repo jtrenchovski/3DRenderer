@@ -289,7 +289,7 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 	for(ModelTriangle& triangle : modelTriangles){
 		for(int i = 0; i < 3; i++){
 			triangle.vertexNormals[i] = vertices[triangle.vertexIndexes[i]];
-			cout << triangle.vertexNormals[i].x << triangle.vertexNormals[i].y << triangle.vertexNormals[i].z << endl;
+			// cout << triangle.vertexNormals[i].x << triangle.vertexNormals[i].y << triangle.vertexNormals[i].z << endl;
 		}
 	}
 	fileStream.close();
