@@ -79,6 +79,7 @@ void FillUpperTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour c
 	for(int y = top.y; y <= triangle.v1().y; y++){
 		while(leftVertice[i+1].y == y) if(i+2 < leftVertice.size() && triangle.v1().x < top.x) i++; else break;
 		while(rigthVertice[j+1].y == y) if(j+2 < rigthVertice.size() && triangle.v2().x > top.x) j++; else break;
+		
 		// This are the coordinates of the left and right point of the line that we need to draw
 		if(i < leftVertice.size() && j < rigthVertice.size()){
 		float startX = leftVertice[i].x;
@@ -131,7 +132,6 @@ void DrawFullTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour co
 }
 
 CanvasPoint projectVertexOntoCanvasPoint(glm::vec3 cameraPosition, float focalLength, glm::vec3 vertexPosition, glm::mat3 cameraOrientation){
-	
 	// Adjust vector to point from camera position(because before it was from (0,0,0) - world center)
 	// and adjust the orientation
 	glm::vec3 adjustedVector = (vertexPosition - cameraPosition) * cameraOrientation;
@@ -160,10 +160,10 @@ void render3DModel(DrawingWindow &window, std::vector<ModelTriangle> modelTriang
 		CanvasTriangle triangle2D = CanvasTriangle(v0, v1, v2);
 
 		DrawFullTriangle(window, triangle2D, triangle3D.colour, depthMatrix);
+	}
 }
 
 void render3DModelWireFrame(DrawingWindow &window, std::vector<ModelTriangle> modelTriangles, float focalLength, glm::vec3 cameraPosition, glm::mat3 cameraOrientation){
-	
 	std::vector<std::vector<float>> depthMatrix(HEIGHT, std::vector<float>(WIDTH, 0));
 
 	for(ModelTriangle triangle3D : modelTriangles){

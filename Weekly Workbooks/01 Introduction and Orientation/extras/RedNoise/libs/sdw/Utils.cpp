@@ -114,7 +114,6 @@ std::vector<CanvasPoint> getLine(CanvasPoint from, CanvasPoint to, bool is3D){
 	// later we add the amount of steps we need. So for example if we have 20 coordinates
 	// but numberOfSteps is 3 we add 6 of the steps. If we devided it by 3 we would 
 	// have unaccurate
-	float numberOfStepsDepth = std::max(numberOfSteps, abs(diffDepth));
 	float stepSizeX = diffX/numberOfSteps;
 	float stepSizeY = diffY/numberOfSteps;
 	float stepSizeDepth = diffDepth/numberOfSteps;
@@ -235,7 +234,6 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 	Colour colour;
 	std::vector<std::pair<glm::vec3, int>> sumOfNormals_nOfNormals;
 	sumOfNormals_nOfNormals.push_back({glm::vec3(0.0, 0.0, 0.0), 0});
-	float vI = 0.0f;
 	bool sphere = false;
 	if(fileStream.is_open()){
 		while(getline(fileStream, line)){
