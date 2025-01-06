@@ -25,7 +25,7 @@ bool orbitBool = false;
 int mode = 2;
 float focalLength = 2.0;
 float scale = 0.35; // 0.35
-glm::vec3 lightSource = glm::vec3(0, 1.4, 2.5) * scale; // put (0.0, 1.4, 5.0) for good phong.
+glm::vec3 lightSource = glm::vec3(0, 1.4, 1.5) * scale; // put (0.0, 1.4, 5.0) for good phong.
 float sourceIntensity = 10000;
 
 void DrawTriangle(DrawingWindow &window, CanvasTriangle triangle, Colour colour);
@@ -246,7 +246,6 @@ glm::vec3 getRayDirection(float focalLength, CanvasPoint imagePlanePoint){
 	glm::vec3 imagePointCameraSpace(imagePlanePoint.x, imagePlanePoint.y, -focalLength);
 	glm::vec3 imagePointWorldSpace = imagePointCameraSpace*cameraOrientation;
 	glm::vec3 direction = glm::normalize(imagePointWorldSpace);
-	// cout << direction.x << direction.y << direction.z << endl;
 	return direction;
 }
 
@@ -270,9 +269,7 @@ float calculateIntensityAngle_PhongShading(RayTriangleIntersection rayTriangleIn
 	glm::vec3 barycentric = rayTriangleIntersection.barycentric;
 	std::array<glm::vec3, 3> vertexNormals = modelTriangle.vertexNormals;
 	glm::vec3 normal = vertexNormals[0]*barycentric[0] + vertexNormals[1]*barycentric[1] + vertexNormals[2]*barycentric[2];
-	// cout << directionToLight.x << directionToLight.y << directionToLight.z << endl;
 	float intensity = max(0.0f, glm::dot(directionToLight, normal));
-	// cout << intensity << endl;
 	return intensity;
 	
 }
@@ -292,7 +289,6 @@ float specularLighting(RayTriangleIntersection rayTriangleIntersection){
 	glm::vec3 vectorToCameraPosition = glm::normalize(cameraPosition - targetPoint);
 	float specular = std::pow(glm::dot(R, vectorToCameraPosition), 256);
 	float intensity = max(0.0f, specular);
-	// cout << intensity << endl;
 	return intensity;
 }
 
@@ -304,18 +300,13 @@ void drawRayTracing(DrawingWindow &window, std::vector<ModelTriangle> modelTrian
 			glm::vec3 rayDirection = getRayDirection(focalLength, CanvasPoint(i, j));
 			RayTriangleIntersection intersection = RayTriangleIntersection();
 			if(getClosestIntersection(modelTriangles, cameraPosition, rayDirection, intersection)){
-				// cout << triangleIntersection.intersectionPoint.x << triangleIntersection.intersectionPoint.y << triangleIntersection.intersectionPoint.z << triangleIntersection.intersectedTriangle << endl;
-				// cout << triangleIntersection.distanceFromCamera << endl;
-
 				// Is it a shadow
 				if(!isShadow(modelTriangles, lightSource, intersection.intersectionPoint)){
 					Colour colour = intersection.intersectedTriangle.colour;
 					float intensityDistance =  glm::clamp(calculateIntensityDistance(intersection.intersectionPoint), 0.001f, 1.0f);
 					float intensityAngle = calculateIntensityAngle_PhongShading(intersection);
 					float intensitySpecular = specularLighting(intersection);
-					// cout << intensityAngle << endl;
-					float intensity = (intensityAngle*0.5f + intensityDistance*0.3f + intensitySpecular*0.2f);
-					// cout << intensity << endl;
+					float intensity = (intensityAngle*0.6f + intensityDistance*0.2f + intensitySpecular*0.2f);
 					uint32_t colourInt = (255 << 24) + (int(colour.red*intensity) << 16) + (int(colour.green*intensity) << 8) + int(colour.blue*intensity);
 					window.setPixelColour(i + WIDTH/2, -j + HEIGHT/2, colourInt);
 				} else{

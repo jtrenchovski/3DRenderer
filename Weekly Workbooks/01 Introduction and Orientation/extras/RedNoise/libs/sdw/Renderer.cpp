@@ -41,7 +41,6 @@ void FillBottomTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour 
 			}
 			// We taking the bigger one of the 2 differences so there are no brakes in our line
 			// Number of steps is how much times do we need to add the stepSize to reach to.x
-			// float numberOfSteps = std::max(abs(diffX), abs(diffY));
 			float stepSizeDepth = (depthTo - depthFrom)/(endX - startX + 1);
 			int t = 0;
 			for(int x = startX; x <= endX; x++){
@@ -62,7 +61,6 @@ void FillBottomTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour 
 		i++;
 		j++;
 	}
-	// DrawTriangle(window, triangle, colour, depthMatrix);
 }
 
 void FillUpperTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour colour, std::vector<std::vector<float>> &depthMatrix){
@@ -115,10 +113,7 @@ void FillUpperTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour c
 		while(rigthVertice[j+1].y == y) if(j+2 < rigthVertice.size() && triangle.v2().x < top.x) j++; else break;
 		i++;
 		j++;
-		// drawLine1(window, from, to, colour, depthMatrix);
 	}
-	// DrawTriangle(window, triangle, colour, depthMatrix);
-	// DrawTriangle(window, triangle, WHITE);
 }
 
 void DrawFullTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour colour, std::vector<std::vector<float>> &depthMatrix){
@@ -133,12 +128,8 @@ void DrawFullTriangle(DrawingWindow &window, CanvasTriangle &triangle, Colour co
 
 	FillUpperTriangle(window, upperTriangle, colour, depthMatrix);
 	FillBottomTriangle(window, bottomTriangle, colour, depthMatrix);
-	
-	// DrawTriangle(window, triangle, colour, depthMatrix);
-	// DrawTriangle(window, triangle, WHITE);
 }
 
-// correct for sure
 CanvasPoint projectVertexOntoCanvasPoint(glm::vec3 cameraPosition, float focalLength, glm::vec3 vertexPosition, glm::mat3 cameraOrientation){
 	
 	// Adjust vector to point from camera position(because before it was from (0,0,0) - world center)
@@ -153,7 +144,6 @@ CanvasPoint projectVertexOntoCanvasPoint(glm::vec3 cameraPosition, float focalLe
 	return CanvasPoint(u, v, -adjustedVector[2]);
 }
 
-// correct 100 %
 void render3DModel(DrawingWindow &window, std::vector<ModelTriangle> modelTriangles, float focalLength, glm::vec3 cameraPosition, glm::mat3 cameraOrientation){
 	
 	std::vector<std::vector<float>> depthMatrix(HEIGHT, std::vector<float>(WIDTH, 0));
@@ -169,11 +159,7 @@ void render3DModel(DrawingWindow &window, std::vector<ModelTriangle> modelTriang
 		
 		CanvasTriangle triangle2D = CanvasTriangle(v0, v1, v2);
 
-		// DrawFullTriangle(window, triangle2D, triangle3D.colour);
 		DrawFullTriangle(window, triangle2D, triangle3D.colour, depthMatrix);
-		// DrawTriangle(window, triangle2D, triangle3D.colour, depthMatrix);
-		// DrawTriangle(window, triangle2D, WHITE);
-	}
 }
 
 void render3DModelWireFrame(DrawingWindow &window, std::vector<ModelTriangle> modelTriangles, float focalLength, glm::vec3 cameraPosition, glm::mat3 cameraOrientation){
@@ -192,8 +178,5 @@ void render3DModelWireFrame(DrawingWindow &window, std::vector<ModelTriangle> mo
 		CanvasTriangle triangle2D = CanvasTriangle(v0, v1, v2);
 
 		DrawTriangle(window, triangle2D, triangle3D.colour, depthMatrix);
-		// DrawFullTriangle(window, triangle2D, triangle3D.colour, depthMatrix);
-		// DrawTriangle(window, triangle2D, triangle3D.colour, depthMatrix);
-		// DrawTriangle(window, triangle2D, WHITE);
 	}
 }

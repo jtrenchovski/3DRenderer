@@ -289,7 +289,6 @@ std::vector<ModelTriangle> readOBJfile(string filename, float scale, std::unorde
 	for(ModelTriangle& triangle : modelTriangles){
 		for(int i = 0; i < 3; i++){
 			triangle.vertexNormals[i] = vertices[triangle.vertexIndexes[i]];
-			// cout << triangle.vertexNormals[i].x << triangle.vertexNormals[i].y << triangle.vertexNormals[i].z << endl;
 		}
 	}
 	fileStream.close();
@@ -320,13 +319,3 @@ unordered_map<std::string, Colour> readMTLfile(std::string filename){
 	fileStream.close();
 	return colourHashMap;
 }
-
-// void drawLine(DrawingWindow &window, CanvasPoint from, CanvasPoint to, Colour colour){
-// 	std::vector<CanvasPoint> line = getLine(from, to);
-// 	for(int i=0; i<line.size(); i++){
-// 		int x = line[i].x;
-// 		int y = line[i].y;
-// 		uint32_t colourInt = (255 << 24) + (int(colour.red) << 16) + (int(colour.green) << 8) + int(colour.blue);
-// 		window.setPixelColour(x, y, colourInt);
-// 	}
-// }
